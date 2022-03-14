@@ -9,7 +9,7 @@ using UnityEngine;
 //transform scaling, make it pecisely, position exactly , bar with capsule, 
 public class GameManager : MonoBehaviour
 {
-    public GameObject soundManager;
+    public GameObject soundManager;// which should assign to "AudioManger" in the inspector
     GameObject[] rodArray;
     GameObject[] sphereArray;
     GameObject mainBar;
@@ -22,27 +22,24 @@ public class GameManager : MonoBehaviour
     float tempRadius;
     //int rodCount;
 
-    private void Awake()
-    {
-        FindObjectOfType<BrAudioManager>().Play("BackGroundMusic");
-    }
+    
 
     // Start is called before the first frame update
     void Start()
     {
-        CollisonSoundTest soundScript;
-        soundScript = soundManager.GetComponent<CollisonSoundTest>();
+        //CollisonSoundTest soundScript;
+        //soundScript = soundManager.GetComponent<CollisonSoundTest>();
 
-        rodTotal = 3;
+        rodTotal = 8;
         rodArray = new GameObject[rodTotal];
-        tempRadius = 0.4f;
+        tempRadius = 0.5f;
         //rodTest = new GameObject[rodCount];
 
         
         sphereArray = new GameObject[rodTotal];
 
 
-        float xGap = 0.4f;
+        float xGap = 0.6f;
         float rodXPos;
 
         //GameObject tempObject;
@@ -56,7 +53,10 @@ public class GameManager : MonoBehaviour
 
             rodArray[i] = SetRod(rodXPos);
 
-            sphereArray[i] = SetSphere(rodArray[i], rodXPos);
+            //sphereArray[i] = SetSphere(rodArray[i], rodXPos);
+
+            sphereArray[i] = SetSphere(rodArray[i], rodXPos, i);
+
 
             //sphereArray[i].AddComponent<AudioSource>();
 
@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
     }
 
     //private void SetSphere(GameObject hrBar)
-    private GameObject SetSphere(GameObject refRod, float xPos)
+    private GameObject SetSphere(GameObject refRod, float xPos, int indx)
 
     {
         GameObject refBall;
@@ -109,6 +109,8 @@ public class GameManager : MonoBehaviour
         ballFJ.connectedBody = rodRB;
 
         refBall.AddComponent<CollisonSoundTest>();
+        refBall.GetComponent<CollisonSoundTest>().index = indx;
+        refBall.GetComponent<CollisonSoundTest>().audioManager = soundManager;
 
         //colidSoundEff = refBall.AddComponent<AudioSource>();
         //colidSoundEff.clip= Resources.Load("AudioFiles/metalSou", typeof(AudioClip)) as AudioClip;
