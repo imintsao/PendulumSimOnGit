@@ -20,26 +20,27 @@ public class GameManager : MonoBehaviour
     int rodTotal;
     Rigidbody tempRB;//this is declareing, so without "=" !!
     float tempRadius;
-    //int rodCount;
+    int swingballCount;
 
     
-
-    // Start is called before the first frame update
     void Start()
     {
         //CollisonSoundTest soundScript;
         //soundScript = soundManager.GetComponent<CollisonSoundTest>();
 
-        rodTotal = 8;
+        rodTotal = 5;
         rodArray = new GameObject[rodTotal];
         tempRadius = 0.5f;
         //rodTest = new GameObject[rodCount];
 
-        
+        swingballCount = 3;
+
         sphereArray = new GameObject[rodTotal];
 
 
-        float xGap = 0.6f;
+        //float xGap = 0.6f;//it was the first attempt
+        float xGap = 0.5f;
+
         float rodXPos;
 
         //GameObject tempObject;
@@ -69,14 +70,17 @@ public class GameManager : MonoBehaviour
         
     }
 
-    
 
     private void CreateMainBar()
     {
 
         mainBar = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        mainBar.name = "Beam";
         mainBar.transform.localScale = new Vector3(20, 1, 1);
         mainBar.transform.position = new Vector3(5.8f, 20, 0);
+        //mainBar.AddComponent<Rigidbody>();
+        mainBar.GetComponent<Rigidbody>().useGravity = false;
+
     }
 
     //private void SetSphere(GameObject hrBar)
@@ -108,9 +112,10 @@ public class GameManager : MonoBehaviour
 
         ballFJ.connectedBody = rodRB;
 
-        refBall.AddComponent<CollisonSoundTest>();
+        /*refBall.AddComponent<CollisonSoundTest>();
         refBall.GetComponent<CollisonSoundTest>().index = indx;
-        refBall.GetComponent<CollisonSoundTest>().audioManager = soundManager;
+        refBall.GetComponent<CollisonSoundTest>().audioManager = soundManager;*/ //just close for now
+        //it is working
 
         //colidSoundEff = refBall.AddComponent<AudioSource>();
         //colidSoundEff.clip= Resources.Load("AudioFiles/metalSou", typeof(AudioClip)) as AudioClip;
@@ -150,6 +155,7 @@ public class GameManager : MonoBehaviour
         hrBarRB = mainBar.GetComponent<Rigidbody>();
 
         rodHingeJoint.connectedBody = hrBarRB;
+        Debug.Log("rodConnetedBody " + refRod.GetComponent<HingeJoint>().connectedBody);
         rodHingeJoint.axis = new Vector3(0f, 0f, 1f);
         rodHingeJoint.autoConfigureConnectedAnchor = (false);
         rodHingeJoint.connectedAnchor = new Vector3(xPos, refY, mainBar.transform.position.z);
@@ -182,9 +188,8 @@ public class GameManager : MonoBehaviour
 
     }
 
-    
 
-    // Update is called once per frame
+
     void Update()
     {
         if (Input.GetKeyUp("s"))
@@ -204,16 +209,33 @@ public class GameManager : MonoBehaviour
                 tempRB.isKinematic = (false);
             }
         }
+        if (Input.GetKeyUp("a"))
+        {
+            for(int i=0; i<swingballCount; i++)
+            {
+                tempRB = rodArray[i].GetComponent<Rigidbody>();
+                tempRB.isKinematic = true;
+
+                //tempRB = sphereArray[i].GetComponent<Rigidbody>();
+                //tempRB.isKinematic = true;
+
+                //rodArray[i].transform.rotation = Quaternion.Euler(0, 0, -30);
+                rodArray[i].transform.Rotate (0, 0, -30, Space.World);
+
+                //sphereArray[i].transform.rotation = Quaternion.Euler(0, 0, -30);
+
+            }
+        }
 
         if (Input.GetKeyUp("f"))
         {
-           
-            tempRB = sphereArray[0].GetComponent<Rigidbody>();//it is defining, and use "="!!
-            tempRB.isKinematic = (false);
-            tempRB.AddForce(new Vector3(-3, 0, 0), ForceMode.Impulse);
+            for (int i=0; i<swingballCount; i++)
+            {
+                tempRB = sphereArray[i].GetComponent<Rigidbody>();//it is defining, and use "="!!
+                tempRB.isKinematic = (false);
+                tempRB.AddForce(new Vector3(-3, 0, 0), ForceMode.Impulse);
 
-
-
+            }
 
             //rodRB.isKinematic = (false);
         }
