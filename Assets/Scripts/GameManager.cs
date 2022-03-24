@@ -16,13 +16,12 @@ public class GameManager : MonoBehaviour
 
     AudioSource colidSoundEff;
 
-
     int rodTotal;
     Rigidbody tempRB;//this is declareing, so without "=" !!
     float tempRadius;
     int swingballCount;
 
-    
+    Rigidbody barRB;
     void Start()
     {
         //CollisonSoundTest soundScript;
@@ -48,6 +47,7 @@ public class GameManager : MonoBehaviour
 
         CreateMainBar();
         rodXPos = mainBar.transform.position.x - mainBar.transform.localScale.x / 2 + xGap;
+        barRB = mainBar.AddComponent<Rigidbody>();
 
         for (int i = 0; i < rodTotal; i++)
         {
@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour
         mainBar.transform.localScale = new Vector3(20, 1, 1);
         mainBar.transform.position = new Vector3(5.8f, 20, 0);
         //mainBar.AddComponent<Rigidbody>();
-        mainBar.GetComponent<Rigidbody>().useGravity = false;
+        //mainBar.GetComponent<Rigidbody>().useGravity = false;
 
     }
 
@@ -95,7 +95,6 @@ public class GameManager : MonoBehaviour
         float refY;
 
         //AudioSource colidSoundEff;
-
 
         refY = mainBar.transform.position.y - mainBar.transform.localScale.y / 2;  // y position of bottom of a bar 
         rodRB = refRod.GetComponent<Rigidbody>();
@@ -133,7 +132,7 @@ public class GameManager : MonoBehaviour
     {
         GameObject refRod;
         Rigidbody rodRB;
-        Rigidbody hrBarRB;
+        //Rigidbody hrBarRB;
         HingeJoint rodHingeJoint;
         float refY;
 
@@ -152,10 +151,13 @@ public class GameManager : MonoBehaviour
 
 
         rodHingeJoint = refRod.AddComponent<HingeJoint>();
-        hrBarRB = mainBar.GetComponent<Rigidbody>();
+        //hrBarRB = mainBar.GetComponent<Rigidbody>();
 
-        rodHingeJoint.connectedBody = hrBarRB;
+        //rodHingeJoint.connectedBody = hrBarRB;
+        rodHingeJoint.connectedBody = barRB;
+
         Debug.Log("rodConnetedBody " + refRod.GetComponent<HingeJoint>().connectedBody);
+
         rodHingeJoint.axis = new Vector3(0f, 0f, 1f);
         rodHingeJoint.autoConfigureConnectedAnchor = (false);
         rodHingeJoint.connectedAnchor = new Vector3(xPos, refY, mainBar.transform.position.z);
