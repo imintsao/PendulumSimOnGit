@@ -6,6 +6,7 @@ public class BuildTestObj : MonoBehaviour
 {
     GameObject testCube;
     GameObject testCylinder;
+    GameObject emptyObj;
 
     Rigidbody cubeRB;
     // Start is called before the first frame update
@@ -17,13 +18,19 @@ public class BuildTestObj : MonoBehaviour
         cubeRB.useGravity = false;
         cubeRB.isKinematic = true;
 
-        testCylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        testCylinder = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         testCylinder.transform.position = new Vector3(0f, -2f, 0f);
+        testCylinder.transform.localScale = new Vector3(1f, 4f, 1f);
         testCylinder.AddComponent<HingeJoint>();
         testCylinder.GetComponent<Rigidbody>().useGravity = true;
         testCylinder.GetComponent<HingeJoint>().connectedBody = cubeRB;
 
+        emptyObj = new GameObject("empty");
 
+
+        testCylinder.transform.parent = emptyObj.transform;
+
+        emptyObj.transform.Rotate(0, -60, -30, Space.World);
 
         
     }

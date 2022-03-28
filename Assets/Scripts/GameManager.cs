@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     GameObject[] rodArray;
     GameObject[] sphereArray;
     GameObject mainBar;
+    GameObject emptyObj;
 
     AudioSource colidSoundEff;
 
@@ -21,7 +22,8 @@ public class GameManager : MonoBehaviour
     float tempRadius;
     int swingballCount;
 
-    Rigidbody barRB;
+    Rigidbody mainBarRB;
+
     void Start()
     {
         //CollisonSoundTest soundScript;
@@ -43,11 +45,15 @@ public class GameManager : MonoBehaviour
         float rodXPos;
 
         //GameObject tempObject;
-        //Transform tempTransform;
 
         CreateMainBar();
         rodXPos = mainBar.transform.position.x - mainBar.transform.localScale.x / 2 + xGap;
-        barRB = mainBar.AddComponent<Rigidbody>();
+        //barRB = mainBar.AddComponent<Rigidbody>();//if I close it then it won't be mess, but still no
+        //oject been connected
+
+        mainBarRB = mainBar.AddComponent<Rigidbody>();
+        mainBarRB.useGravity = false;
+        mainBarRB.isKinematic = true;
 
         for (int i = 0; i < rodTotal; i++)
         {
@@ -65,6 +71,11 @@ public class GameManager : MonoBehaviour
 
         }
 
+        //for(int i=0; i < rodTotal; i++)
+        //{
+        //    rodArray[i].GetComponent<HingeJoint>().connectedBody = barRB;
+        //}
+
         //sphereArray[0].GetComponent<CollisonSoundTest>
 
         
@@ -80,6 +91,8 @@ public class GameManager : MonoBehaviour
         mainBar.transform.position = new Vector3(5.8f, 20, 0);
         //mainBar.AddComponent<Rigidbody>();
         //mainBar.GetComponent<Rigidbody>().useGravity = false;
+        //mainBar.GetComponent<Rigidbody>().isKinematic = true;
+
 
     }
 
@@ -142,6 +155,10 @@ public class GameManager : MonoBehaviour
         //refY = hrBar.transform.position.y - hrBar.transform.localScale.x / 2;//when hrBar as cylinter rotate to 90"
 
         refRod = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        emptyObj = new GameObject("rodsMom");
+        refRod.transform.parent = emptyObj.transform;
+        emptyObj.transform.position = new Vector3(xPos, refY, mainBar.transform.position.z);
+
         refRod.transform.localScale = new Vector3(0.02f, 1.8f, 0.02f);
         //rodForTest.transform.position = new Vector3(hrBar.transform.position.x, refY - rodForTest.transform.localScale.y, hrBar.transform.position.z);
         refRod.transform.position = new Vector3(xPos, refY - refRod.transform.localScale.y, mainBar.transform.position.z);
@@ -150,45 +167,33 @@ public class GameManager : MonoBehaviour
         //localScaleY is twice length for cyclinder and cpsusle,
 
 
+        //hrBarRB = mainBar.AddComponent<Rigidbody>();
+        //hrBarRB.useGravity = false;
+        //hrBarRB.isKinematic = true;
+
         rodHingeJoint = refRod.AddComponent<HingeJoint>();
-        //hrBarRB = mainBar.GetComponent<Rigidbody>();
 
-        //rodHingeJoint.connectedBody = hrBarRB;
-        rodHingeJoint.connectedBody = barRB;
-
+        rodHingeJoint.connectedBody = mainBarRB;
+        
         Debug.Log("rodConnetedBody " + refRod.GetComponent<HingeJoint>().connectedBody);
 
         rodHingeJoint.axis = new Vector3(0f, 0f, 1f);
-        rodHingeJoint.autoConfigureConnectedAnchor = (false);
-        rodHingeJoint.connectedAnchor = new Vector3(xPos, refY, mainBar.transform.position.z);
+        //rodHingeJoint.autoConfigureConnectedAnchor = (false);
+        //rodHingeJoint.connectedAnchor = new Vector3(xPos, refY, mainBar.transform.position.z);
 
         rodRB = refRod.GetComponent<Rigidbody>();
         rodRB.useGravity = (true);//turn it on, then it can swin
-        rodRB.isKinematic = (false);//could be a trigger when "false" is like real physics
+        rodRB.isKinematic = (true);//could be a trigger when "false" is like real physics
+
+        //emptyObj = new GameObject("rodsMom");
+        //refRod.transform.parent = emptyObj.transform;
+        //emptyObj.transform.position = new Vector3(xPos, refY, mainBar.transform.position.z);
 
         return refRod;
 
     }
 
-    private Transform SetBar(float xPos) //still don't really know why use Transform class instead
-    //private GameObject SetBar(float xPos)
-    {
-        GameObject hrBar;
-        Rigidbody hrBarRB;
-
-        //Transform hrBar;
-
-        hrBar = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        hrBar.transform.localScale = new Vector3(1f, 4f, 1f);
-        hrBar.transform.Rotate(90f, 0f, 0f, Space.Self);
-        hrBar.transform.position = new Vector3(xPos, 20f, 0.5f);
-        hrBarRB = hrBar.AddComponent<Rigidbody>();
-        hrBarRB.useGravity = (false);
-        hrBarRB.isKinematic = (true);
-
-        return hrBar.transform;
-
-    }
+    
 
 
 
@@ -222,14 +227,17 @@ public class GameManager : MonoBehaviour
                 //tempRB.isKinematic = true;
 
                 //rodArray[i].transform.rotation = Quaternion.Euler(0, 0, -30);
-                rodArray[i].transform.Rotate (0, 0, -30, Space.World);
+                rodArray[i].transform.parent.Rotate (0, 0, -30, Space.World);
 
                 //sphereArray[i].transform.rotation = Quaternion.Euler(0, 0, -30);
 
             }
         }
 
-        if (Input.GetKeyUp("f"))
+        
+
+
+            if (Input.GetKeyUp("f"))
         {
             for (int i=0; i<swingballCount; i++)
             {
@@ -282,6 +290,26 @@ public class GameManager : MonoBehaviour
         //gameObjectsHingeJoint.connectedBody = gameObjsRigidBody;
         //gameObjsRigidBody.useGravity = (false);
         //gameObjsRigidBody.isKinematic = (true);
+
+    //private Transform SetBar(float xPos) //still don't really know why use Transform class instead
+    ////private GameObject SetBar(float xPos)
+    //{
+    //    GameObject hrBar;
+    //    Rigidbody hrBarRB;
+
+    //    //Transform hrBar;
+
+    //    hrBar = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+    //    hrBar.transform.localScale = new Vector3(1f, 4f, 1f);
+    //    hrBar.transform.Rotate(90f, 0f, 0f, Space.Self);
+    //    hrBar.transform.position = new Vector3(xPos, 20f, 0.5f);
+    //    hrBarRB = hrBar.AddComponent<Rigidbody>();
+    //    hrBarRB.useGravity = (false);
+    //    hrBarRB.isKinematic = (false);
+
+    //    return hrBar.transform;
+
+    //}
 
      */
 }
