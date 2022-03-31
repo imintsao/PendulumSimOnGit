@@ -6,14 +6,22 @@ using UnityEngine;
 //refact code
 //use fixedjoint
 //start to UI, like panel , so that user can start to interactive
-//transform scaling, make it pecisely, position exactly , bar with capsule, 
+//transform scaling, make it pecisely, position exactly , bar with capsule,
+
+//fixed rodpos (ya, sort of...)
+//crete tiny cube then connect with ball, tiny cube should fixed joint with rod
+//try different drag  (slow down the object?)
+//try different material like metalic one (ya, it's done, when "Bounce" set to 0.9-1.0)
+//mass? and fixed joint really detail?
+
 public class GameManager : MonoBehaviour
-{
+{   
     public GameObject soundManager;// which should assign to "AudioManger" in the inspector
     GameObject[] rodArray;
     GameObject[] sphereArray;
     GameObject mainBar;
     GameObject emptyObj;
+    GameObject[] tinyObj;
 
     AudioSource colidSoundEff;
 
@@ -24,6 +32,12 @@ public class GameManager : MonoBehaviour
 
     Rigidbody mainBarRB;
 
+    float ballMass;
+    float rodMass;
+
+    Material blkColorMat;
+    PhysicMaterial metalSurfMat;
+
     void Start()
     {
         //CollisonSoundTest soundScript;
@@ -31,45 +45,59 @@ public class GameManager : MonoBehaviour
 
         rodTotal = 5;
         rodArray = new GameObject[rodTotal];
-        tempRadius = 0.5f;
-        //rodTest = new GameObject[rodCount];
+        tempRadius = 1.5f;
 
-        swingballCount = 3;
+        swingballCount = 2;
 
         sphereArray = new GameObject[rodTotal];
 
+        tinyObj = new GameObject[rodTotal];
+
 
         //float xGap = 0.6f;//it was the first attempt
-        float xGap = 0.5f;
 
-        float rodXPos;
+        float firstRodXPos;
 
-        //GameObject tempObject;
+        float rodThickness;
+        rodThickness = 0.02f;
+
+
+        ballMass = 4.0f;
+        rodMass = 0.5f;
+
+        blkColorMat = Resources.Load("Materials/BlackColor", typeof(Material)) as Material;
+        metalSurfMat = Resources.Load("Materials/MetalSurface", typeof(PhysicMaterial)) as PhysicMaterial;
+
 
         CreateMainBar();
-        rodXPos = mainBar.transform.position.x - mainBar.transform.localScale.x / 2 + xGap;
+        firstRodXPos = mainBar.transform.position.x - mainBar.transform.localScale.x / 2;
+
         //barRB = mainBar.AddComponent<Rigidbody>();//if I close it then it won't be mess, but still no
         //oject been connected
 
-        mainBarRB = mainBar.AddComponent<Rigidbody>();
-        mainBarRB.useGravity = false;
-        mainBarRB.isKinematic = true;
+        
 
         for (int i = 0; i < rodTotal; i++)
+
+
         {
 
-            rodArray[i] = SetRod(rodXPos);
+            rodArray[i] = SetRod(firstRodXPos);
 
-            //sphereArray[i] = SetSphere(rodArray[i], rodXPos);
 
-            sphereArray[i] = SetSphere(rodArray[i], rodXPos, i);
+            sphereArray[i] = SetSphere(rodArray[i], firstRodXPos, i);
+
+            tinyObj[i] = SetTinyObj(rodArray[i],firstRodXPos);
 
 
             //sphereArray[i].AddComponent<AudioSource>();
 
-            rodXPos += xGap;
+            firstRodXPos += tempRadius +rodThickness;
+
 
         }
+
+        rodArray[0].name = "Rod01";
 
         //for(int i=0; i < rodTotal; i++)
         //{
@@ -78,7 +106,7 @@ public class GameManager : MonoBehaviour
 
         //sphereArray[0].GetComponent<CollisonSoundTest>
 
-        
+
     }
 
 
@@ -89,10 +117,10 @@ public class GameManager : MonoBehaviour
         mainBar.name = "Beam";
         mainBar.transform.localScale = new Vector3(20, 1, 1);
         mainBar.transform.position = new Vector3(5.8f, 20, 0);
-        //mainBar.AddComponent<Rigidbody>();
-        //mainBar.GetComponent<Rigidbody>().useGravity = false;
-        //mainBar.GetComponent<Rigidbody>().isKinematic = true;
 
+        mainBarRB = mainBar.AddComponent<Rigidbody>();
+        mainBarRB.useGravity = false;
+        mainBarRB.isKinematic = true;
 
     }
 
@@ -119,8 +147,15 @@ public class GameManager : MonoBehaviour
 
         refBall.transform.position = new Vector3(xPos, refYforBall - tempRadius / 2.0f, mainBar.transform.position.z);
 
+        refBall.GetComponent<Renderer>().material = blkColorMat;
+        refBall.GetComponent<SphereCollider>().material = metalSurfMat;
+
+
 
         ballFJ = refBall.AddComponent<FixedJoint>();
+
+        refBall.GetComponent<Rigidbody>().mass = ballMass;
+
 
         ballFJ.connectedBody = rodRB;
 
@@ -138,12 +173,12 @@ public class GameManager : MonoBehaviour
         return refBall;
     }
 
-    //private void SetRod(GameObject hrBar)
-    //private void SetRod(Transform hrBar)//this is the main focus//private GameObject SetRod
+    
     private GameObject SetRod(float xPos)
 
     {
         GameObject refRod;
+        //GameObject refTinyObj;
         Rigidbody rodRB;
         //Rigidbody hrBarRB;
         HingeJoint rodHingeJoint;
@@ -155,11 +190,15 @@ public class GameManager : MonoBehaviour
         //refY = hrBar.transform.position.y - hrBar.transform.localScale.x / 2;//when hrBar as cylinter rotate to 90"
 
         refRod = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+
+
         emptyObj = new GameObject("rodsMom");
         refRod.transform.parent = emptyObj.transform;
         emptyObj.transform.position = new Vector3(xPos, refY, mainBar.transform.position.z);
 
-        refRod.transform.localScale = new Vector3(0.02f, 1.8f, 0.02f);
+        //refTinyObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+        refRod.transform.localScale = new Vector3(0.02f, 2.8f, 0.02f);
         //rodForTest.transform.position = new Vector3(hrBar.transform.position.x, refY - rodForTest.transform.localScale.y, hrBar.transform.position.z);
         refRod.transform.position = new Vector3(xPos, refY - refRod.transform.localScale.y, mainBar.transform.position.z);
         //rodForTest.transform.position = new Vector3(hrBar.transform.position.x, hrBar.transform.position.y, hrBar.transform.position.z);
@@ -167,14 +206,11 @@ public class GameManager : MonoBehaviour
         //localScaleY is twice length for cyclinder and cpsusle,
 
 
-        //hrBarRB = mainBar.AddComponent<Rigidbody>();
-        //hrBarRB.useGravity = false;
-        //hrBarRB.isKinematic = true;
 
         rodHingeJoint = refRod.AddComponent<HingeJoint>();
 
         rodHingeJoint.connectedBody = mainBarRB;
-        
+
         Debug.Log("rodConnetedBody " + refRod.GetComponent<HingeJoint>().connectedBody);
 
         rodHingeJoint.axis = new Vector3(0f, 0f, 1f);
@@ -182,18 +218,41 @@ public class GameManager : MonoBehaviour
         //rodHingeJoint.connectedAnchor = new Vector3(xPos, refY, mainBar.transform.position.z);
 
         rodRB = refRod.GetComponent<Rigidbody>();
-        rodRB.useGravity = (true);//turn it on, then it can swin
-        rodRB.isKinematic = (true);//could be a trigger when "false" is like real physics
+        rodRB.mass = rodMass;
+        rodRB.useGravity = true;//turn it on, then it can swin
+        rodRB.isKinematic = false;//could be a trigger when "false" is like real physics
 
-        //emptyObj = new GameObject("rodsMom");
-        //refRod.transform.parent = emptyObj.transform;
-        //emptyObj.transform.position = new Vector3(xPos, refY, mainBar.transform.position.z);
+        
 
         return refRod;
 
     }
 
-    
+    private GameObject SetTinyObj(GameObject refRod, float xPos)
+    {
+        GameObject refTinyObj;
+        float refY;
+        refY = mainBar.transform.position.y - mainBar.transform.localScale.y / 2;
+
+        float refYforTinyObj;
+        refYforTinyObj = refY - refRod.transform.localScale.y * 2;
+
+        FixedJoint tinyFJ;
+        Rigidbody refRodRB;
+
+        refTinyObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        refTinyObj.transform.position = new Vector3(xPos, refYforTinyObj, mainBar.transform.position.z);
+        refTinyObj.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+
+        tinyFJ = refTinyObj.AddComponent<FixedJoint>();
+        refRodRB = refRod.GetComponent<Rigidbody>();
+
+        tinyFJ.connectedBody = refRodRB;
+
+        return refTinyObj;
+    }
+
+
 
 
 
@@ -218,28 +277,28 @@ public class GameManager : MonoBehaviour
         }
         if (Input.GetKeyUp("a"))
         {
-            for(int i=0; i<swingballCount; i++)
+            for (int i = 0; i < swingballCount; i++)
             {
-                tempRB = rodArray[i].GetComponent<Rigidbody>();
-                tempRB.isKinematic = true;
+                //tempRB = rodArray[i].GetComponent<Rigidbody>();
+                //tempRB.isKinematic = true;
 
                 //tempRB = sphereArray[i].GetComponent<Rigidbody>();
                 //tempRB.isKinematic = true;
 
                 //rodArray[i].transform.rotation = Quaternion.Euler(0, 0, -30);
-                rodArray[i].transform.parent.Rotate (0, 0, -30, Space.World);
+                rodArray[i].transform.parent.Rotate(0, 0, -30, Space.World);
 
                 //sphereArray[i].transform.rotation = Quaternion.Euler(0, 0, -30);
 
             }
         }
 
-        
 
 
-            if (Input.GetKeyUp("f"))
+
+        if (Input.GetKeyUp("f"))
         {
-            for (int i=0; i<swingballCount; i++)
+            for (int i = 0; i < swingballCount; i++)
             {
                 tempRB = sphereArray[i].GetComponent<Rigidbody>();//it is defining, and use "="!!
                 tempRB.isKinematic = (false);
